@@ -27,7 +27,7 @@ func main() {
 
 	app.Name = "Quantum"
 	app.Usage = "Simple time tracking"
-	app.Description = "Simple command line application for tracking time spend on tasks"
+	app.Description = "Simple command line application for tracking time spent on tasks"
 
 	app.Commands = []cli.Command{
 		{
@@ -83,8 +83,7 @@ func listAction(c *cli.Context) error {
 	if searchDays == 0 {
 		searchDays = 7
 	}
-	afterDate := time.Now().AddDate(0, 0, -searchDays).Truncate(time.Hour)
-	fmt.Println(afterDate)
+	afterDate := time.Now().AddDate(0, 0, -searchDays)
 	totalHours := 0
 	tasks := [][]string{}
 	for _, task := range records {

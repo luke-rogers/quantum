@@ -3,7 +3,27 @@ Simple command line time tracking app
 
 ## Usages
 
-### Add
+### Starting and stopping a task
+You can start by using `start` followed by the task name and optionally a ref.
+Stopping follows a similar fashion by using `stop` followed by the task name. Once the task has been stopped it will be
+added to the full list of tasks.
+
+```
+quantum start "FMO-123" "REF-001"
+quantum stop "FMO-123"
+```
+
+#### List in-progress tasks
+To list in-progress tasks use `list inprogress`
+```
++--------+-----+---------------------+
+|  TASK  | REF |       STARTED       |
++--------+-----+---------------------+
+| tester |     | 2018-02-12 22:41:24 |
++--------+-----+---------------------+
+```
+
+### Manually add a task
 Add a task using `add` or `a`. Arguments are task (mandatory), followed by number of hours (mandatory) and ref (optional).
 
 ```
@@ -11,7 +31,7 @@ quantum add "Build quantum cli" 10.5 "Ref code: 123"
 quantum a "Build quantum cli" 10.5 "Ref code: 123"
 ```
 
-### List
+### Listing tasks
 
 List the tasks by using `list` or `l`. By default this will show the tasks in the last 7 days. Optional parameter allows you to configure the number of previous days to search over.
 ```
@@ -47,7 +67,7 @@ quantum list ref "QUANTUM-001" "QUANTUM-002"
 +---------+-------+-----------+---------------------+-----------------------------+
 ```
 
-### Delete
+### Deleting tasks
 Delete a task by using `delete` or `d`. Takes a single uid argument or the record to delete.
 
 ```
@@ -55,7 +75,7 @@ quantum delete 10Q9i8n6x2djb53ClMSswxFaD9l
 quantum d 10Q9i8n6x2djb53ClMSswxFaD9l
 ```
 
-#### Delete all
+#### Delete all tasks
 
 Delete all tasks by using quantum 'delete all' or 'd all'.
 

@@ -22,6 +22,12 @@ type Task struct {
 	Date  time.Time
 }
 
+type Inprogress struct {
+	Name      string
+	Ref       string
+	StartTime time.Time
+}
+
 type listFilter func(task Task) bool
 
 func main() {
@@ -38,31 +44,49 @@ func main() {
 			Usage:   "list tasks",
 			Subcommands: []cli.Command{
 				{
-					Name:  "month",
-					Usage: "List last months records",
-					Action: listMonthAction,
+					Name:     "month",
+					Usage:    "List last months records",
+					Action:   listMonthAction,
 					Category: "Time filtering",
 				},
 				{
-					Name:  "year",
-					Usage: "List last years records",
-					Action: listYearAction,
+					Name:     "year",
+					Usage:    "List last years records",
+					Action:   listYearAction,
 					Category: "Time filtering",
 				},
 				{
-					Name:  "task",
-					Usage: "List tasks with matching task value",
-					Action: listTaskAction,
+					Name:     "task",
+					Usage:    "List tasks with matching task value",
+					Action:   listTaskAction,
 					Category: "Data filtering",
 				},
 				{
-					Name:  "ref",
-					Usage: "List tasks with matching ref value",
-					Action: listRefAction,
+					Name:     "ref",
+					Usage:    "List tasks with matching ref value",
+					Action:   listRefAction,
+					Category: "Data filtering",
+				},
+				{
+					Name:     "inprogress",
+					Usage:    "List in-progress tasks",
+					Action:   listInprogressAction,
 					Category: "Data filtering",
 				},
 			},
 			Action: listDaysAction,
+		},
+		{
+			Name:      "start",
+			Usage:     "start a task",
+			ArgsUsage: "task name",
+			Action:    startAction,
+		},
+		{
+			Name:      "stop",
+			Usage:     "stop a task",
+			ArgsUsage: "task name",
+			Action:    stopAction,
 		},
 		{
 			Name:      "add",
@@ -88,6 +112,91 @@ func main() {
 	}
 
 	app.Run(os.Args)
+}
+
+func startAction(ctx *cli.Context) error {
+	task := ctx.Args().First()
+	if task == "" {
+		fmt.Println("Incorrect usage of start \n")
+		cli.ShowCommandHelpAndExit(ctx, "start", 1)
+		return nil
+	}
+
+	db, err := openDb()
+	if err != nil {
+		return err
+	}
+
+	db.Write("inprogress", task, Inprogress{
+		Name:      task,
+		Ref:       ctx.Args().Get(1),
+		StartTime: time.Now(),
+	})
+
+	return nil
+}
+
+func stopAction(ctx *cli.Context) error {
+	task := ctx.Args().First()
+	if task == "" {
+		fmt.Println("Incorrect usage of stop \n")
+		cli.ShowCommandHelpAndExit(ctx, "stop", 1)
+		return nil
+	}
+
+	db, err := openDb()
+	if err != nil {
+		return err
+	}
+
+	inprogress := Inprogress{}
+	if err := db.Read("inprogress", task, &inprogress); err != nil {
+		return cli.NewExitError("Error reading database: "+err.Error(), 1)
+	}
+
+	uid := ksuid.New()
+
+	db.Write("tasks", uid.String(), Task{
+		Name:  task,
+		Hours: time.Now().Sub(inprogress.StartTime).Hours(),
+		Uid:   uid.String(),
+		Ref:   inprogress.Ref,
+		Date:  time.Now(),
+	})
+
+	if err := db.Delete("inprogress", task); err != nil {
+		return cli.NewExitError("Error cleaning up inprogress task: "+err.Error(), 1)
+	}
+
+	return nil
+}
+
+func listInprogressAction(ctx *cli.Context) error {
+	db, err := openDb()
+	if err != nil {
+		return err
+	}
+
+	records, err := db.ReadAll("inprogress")
+	if err != nil {
+		return cli.NewExitError("Error reading database: "+err.Error(), 1)
+	}
+
+	inprogress := [][]string{}
+	for _, task := range records {
+		inprogressFound := Inprogress{}
+		if err := json.Unmarshal([]byte(task), &inprogressFound); err != nil {
+			return cli.NewExitError("Error reading record: "+err.Error(), 1)
+		}
+		inprogress = append(inprogress, []string{inprogressFound.Name, inprogressFound.Ref, inprogressFound.StartTime.Format("2006-01-02 15:04:05")})
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Task", "Ref", "Started"})
+	table.AppendBulk(inprogress)
+	table.Render()
+
+	return nil
 }
 
 func listDaysAction(c *cli.Context) error {

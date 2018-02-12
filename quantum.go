@@ -22,6 +22,8 @@ type Task struct {
 	Date  time.Time
 }
 
+type listFilter func(task Task) bool
+
 func main() {
 	var app = cli.NewApp()
 
@@ -34,13 +36,52 @@ func main() {
 			Name:    "list",
 			Aliases: []string{"l"},
 			Usage:   "list tasks",
-			Flags: []cli.Flag{
-				cli.IntFlag{
-					Name:  "days",
-					Usage: "Number of days back to run the search, default is 7",
+			Subcommands: []cli.Command{
+				{
+					Name:  "month",
+					Usage: "List last months records",
+					Action: func(c *cli.Context) error {
+						return listAction(c, func(task Task) bool {
+							return task.Date.After(time.Now().AddDate(0, -1, 0))
+						})
+					},
+					Category: "Time filtering",
+				},
+				{
+					Name:  "year",
+					Usage: "List last years records",
+					Action: func(c *cli.Context) error {
+						return listAction(c, func(task Task) bool {
+							return task.Date.After(time.Now().AddDate(-1, 0, 0))
+						})
+					},
+					Category: "Time filtering",
+				},
+				{
+					Name:  "task",
+					Usage: "List tasks with matching task value",
+					Action: func(c *cli.Context) error {
+						return listAction(c, func(task Task) bool {
+							for _, taskArg := range c.Args() {
+								if taskArg == task.Name {
+									return true
+								}
+							}
+							return false
+						})
+					},
+					Category: "Time filtering",
 				},
 			},
-			Action: listAction,
+			Action: func(c *cli.Context) error {
+				searchDays, error := strconv.Atoi(c.Args().First())
+				if error != nil || searchDays == 0 {
+					searchDays = 7
+				}
+				return listAction(c, func(task Task) bool {
+					return task.Date.After(time.Now().AddDate(0, 0, -searchDays))
+				})
+			},
 		},
 		{
 			Name:      "add",
@@ -68,7 +109,7 @@ func main() {
 	app.Run(os.Args)
 }
 
-func listAction(c *cli.Context) error {
+func listAction(c *cli.Context, filter listFilter) error {
 	db, err := openDb()
 	if err != nil {
 		return err
@@ -79,11 +120,6 @@ func listAction(c *cli.Context) error {
 		return cli.NewExitError("Error reading database: "+err.Error(), 1)
 	}
 
-	searchDays := c.Int("days")
-	if searchDays == 0 {
-		searchDays = 7
-	}
-	afterDate := time.Now().AddDate(0, 0, -searchDays)
 	totalHours := 0
 	tasks := [][]string{}
 	for _, task := range records {
@@ -92,7 +128,7 @@ func listAction(c *cli.Context) error {
 			return cli.NewExitError("Error reading record: "+err.Error(), 1)
 		}
 
-		if taskFound.Date.After(afterDate) {
+		if filter(taskFound) {
 			tasks = append(tasks, []string{taskFound.Name, strconv.Itoa(taskFound.Hours), taskFound.Ref, taskFound.Date.Format("2006-01-02 15:04:05"), taskFound.Uid})
 			totalHours += taskFound.Hours
 		}

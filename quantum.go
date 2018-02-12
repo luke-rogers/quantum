@@ -16,7 +16,7 @@ import (
 
 type Task struct {
 	Name  string
-	Hours int
+	Hours float64
 	Ref   string
 	Uid   string
 	Date  time.Time
@@ -144,7 +144,7 @@ func listAction(c *cli.Context, filter listFilter) error {
 		return cli.NewExitError("Error reading database: "+err.Error(), 1)
 	}
 
-	totalHours := 0
+	totalHours := 0.0
 	tasks := [][]string{}
 	for _, task := range records {
 		taskFound := Task{}
@@ -153,14 +153,14 @@ func listAction(c *cli.Context, filter listFilter) error {
 		}
 
 		if filter(taskFound) {
-			tasks = append(tasks, []string{taskFound.Name, strconv.Itoa(taskFound.Hours), taskFound.Ref, taskFound.Date.Format("2006-01-02 15:04:05"), taskFound.Uid})
+			tasks = append(tasks, []string{taskFound.Name, strconv.FormatFloat(taskFound.Hours, 'f', 2, 64), taskFound.Ref, taskFound.Date.Format("2006-01-02 15:04:05"), taskFound.Uid})
 			totalHours += taskFound.Hours
 		}
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"Task", "Hours", "Ref", "Date", "UID"})
-	table.SetFooter([]string{"", "", "", "Total hours", strconv.Itoa(totalHours)})
+	table.SetFooter([]string{"", "", "", "Total hours", strconv.FormatFloat(totalHours, 'f', 2, 64)})
 	table.AppendBulk(tasks)
 	table.Render()
 
@@ -178,7 +178,7 @@ func addAction(ctx *cli.Context) error {
 		return nil
 	}
 
-	hourInt, err := strconv.Atoi(hours)
+	hoursFloat, err := strconv.ParseFloat(hours, 64)
 
 	if err != nil {
 		fmt.Println("Incorrect usage of add \n")
@@ -195,7 +195,7 @@ func addAction(ctx *cli.Context) error {
 
 	db.Write("tasks", uid.String(), Task{
 		Name:  task,
-		Hours: hourInt,
+		Hours: hoursFloat,
 		Uid:   uid.String(),
 		Ref:   ref,
 		Date:  time.Now(),

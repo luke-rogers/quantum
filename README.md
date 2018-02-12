@@ -4,11 +4,11 @@ Simple command line time tracking app
 ## Usages
 
 ### Add
-Add a task using `add` or `a`. Arguments are task (mandatory), followed by integer number of hours (mandatory) and ref (optional).
+Add a task using `add` or `a`. Arguments are task (mandatory), followed by number of hours (mandatory) and ref (optional).
 
 ```
-quantum add "Build quantum cli" 10 "Ref code: 123"
-quantum a "Build quantum cli" 10 "Ref code: 123"
+quantum add "Build quantum cli" 10.5 "Ref code: 123"
+quantum a "Build quantum cli" 10.5 "Ref code: 123"
 ```
 
 ### List
@@ -33,14 +33,18 @@ quantum list ref "QUANTUM-001" "QUANTUM-002"
 
 #### List Result
 ```
-+-------------------+-------+---------------+---------------------+-----------------------------+
-|       TASK        | HOURS |      REF      |        DATE         |             UID             |
-+-------------------+-------+---------------+---------------------+-----------------------------+
-| Build quantum cli |    10 | Ref code: 123 | 2018-02-11 21:04:43 | 10Q9i8n6x2djb53ClMSswxFaD9l |
-| Jira QUANTUM-001  |     5 |               | 2018-02-11 21:06:13 | 10Q9tYiMyl8EiLRZGAETGyiIS2A |
-+-------------------+-------+---------------+---------------------+-----------------------------+
-|                                                 TOTAL HOURS     |             15              |
-+-------------------+-------+---------------+---------------------+-----------------------------+
++---------+-------+-----------+---------------------+-----------------------------+
+|  TASK   | HOURS |    REF    |        DATE         |             UID             |
++---------+-------+-----------+---------------------+-----------------------------+
+| FMO-123 |  5.00 |           | 2018-02-12 21:21:17 | 10T0qh4Pm4CPVZw2Z1KaNcjYuXr |
+| FMO-456 |  8.00 |           | 2018-02-12 21:21:23 | 10T0rZ93n1Y8kGLTtXU4hOpU24R |
+| FMO-789 |  8.00 |           | 2018-02-12 21:21:28 | 10T0s6DZxZ54uWtWcgX6xeP2Vkt |
+| FMO-123 |  4.00 |           | 2018-02-12 21:21:33 | 10T0skk088OMfccTTfvb8SeFnK7 |
+| FMO-501 |  5.00 | RANDOMREF | 2018-02-12 21:38:37 | 10T2xUQGOJYL9cHown55rc9II3F |
+| FMO-110 |  4.50 |           | 2018-02-12 21:49:27 | 10T4H7UzAnUWeVKBUrIQbgCJkBK |
++---------+-------+-----------+---------------------+-----------------------------+
+|                                   TOTAL HOURS     |            34 50            |
++---------+-------+-----------+---------------------+-----------------------------+
 ```
 
 ### Delete

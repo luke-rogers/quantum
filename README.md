@@ -68,10 +68,10 @@ quantum list ref "QUANTUM-001" "QUANTUM-002"
 ```
 
 ### Deleting tasks
-Delete a task by using `delete` or `d`. Takes a single uid argument or the record to delete.
+Delete a task by using `delete` or `d`. Takes a space separated list of uids.
 
 ```
-quantum delete 10Q9i8n6x2djb53ClMSswxFaD9l
+quantum delete 10Q9i8n6x2djb53ClMSswxFaD9l 10T0qh4Pm4CPVZw2Z1KaNcjYuXr
 quantum d 10Q9i8n6x2djb53ClMSswxFaD9l
 ```
 

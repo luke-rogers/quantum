@@ -325,8 +325,7 @@ func deleteAllAction(ctx *cli.Context) error {
 }
 
 func deleteAction(ctx *cli.Context) error {
-	uid := ctx.Args().Get(0)
-	if uid == "" {
+	if len(ctx.Args()) == 0 {
 		fmt.Println("Incorrect usage of delete \n")
 		cli.ShowCommandHelpAndExit(ctx, "delete", 1)
 		return nil
@@ -337,8 +336,10 @@ func deleteAction(ctx *cli.Context) error {
 		return err
 	}
 
-	if err := db.Delete("tasks", uid); err != nil {
-		return cli.NewExitError("Error delete record from database: "+err.Error(), 1)
+	for _, uid := range ctx.Args() {
+		if err := db.Delete("tasks", uid); err != nil {
+			return cli.NewExitError("Error delete record from database: "+err.Error(), 1)
+		}
 	}
 
 	return nil

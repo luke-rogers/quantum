@@ -40,37 +40,26 @@ func main() {
 				{
 					Name:  "month",
 					Usage: "List last months records",
-					Action: func(c *cli.Context) error {
-						return listAction(c, func(task Task) bool {
-							return task.Date.After(time.Now().AddDate(0, -1, 0))
-						})
-					},
+					Action: listMonthAction,
 					Category: "Time filtering",
 				},
 				{
 					Name:  "year",
 					Usage: "List last years records",
-					Action: func(c *cli.Context) error {
-						return listAction(c, func(task Task) bool {
-							return task.Date.After(time.Now().AddDate(-1, 0, 0))
-						})
-					},
+					Action: listYearAction,
 					Category: "Time filtering",
 				},
 				{
 					Name:  "task",
 					Usage: "List tasks with matching task value",
-					Action: func(c *cli.Context) error {
-						return listAction(c, func(task Task) bool {
-							for _, taskArg := range c.Args() {
-								if taskArg == task.Name {
-									return true
-								}
-							}
-							return false
-						})
-					},
-					Category: "Time filtering",
+					Action: listTaskAction,
+					Category: "Data filtering",
+				},
+				{
+					Name:  "ref",
+					Usage: "List tasks with matching ref value",
+					Action: listRefAction,
+					Category: "Data filtering",
 				},
 			},
 			Action: func(c *cli.Context) error {
@@ -107,6 +96,40 @@ func main() {
 	}
 
 	app.Run(os.Args)
+}
+
+func listMonthAction(c *cli.Context) error {
+	return listAction(c, func(task Task) bool {
+		return task.Date.After(time.Now().AddDate(0, -1, 0))
+	})
+}
+
+func listYearAction(c *cli.Context) error {
+	return listAction(c, func(task Task) bool {
+		return task.Date.After(time.Now().AddDate(-1, 0, 0))
+	})
+}
+
+func listTaskAction(c *cli.Context) error {
+	return listAction(c, func(task Task) bool {
+		for _, taskArg := range c.Args() {
+			if taskArg == task.Name {
+				return true
+			}
+		}
+		return false
+	})
+}
+
+func listRefAction(c *cli.Context) error {
+	return listAction(c, func(task Task) bool {
+		for _, refArg := range c.Args() {
+			if refArg == task.Ref {
+				return true
+			}
+		}
+		return false
+	})
 }
 
 func listAction(c *cli.Context, filter listFilter) error {

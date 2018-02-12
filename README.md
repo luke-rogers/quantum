@@ -14,16 +14,18 @@ quantum a "Build quantum cli" 10 "Ref code: 123"
 ### List
 
 List the tasks by using `list` or `l`. By default this will show the tasks in the last 7 days. Optional parameter allows you to configure the number of previous days to search over.
-There is also additional support for easy sub commands to search over the past month or year using `list month` or `list year` respectively.
 ```
 quantum list
 quantum l 10
+```
+There is also additional support for easy sub commands to search over the past month or year using `list month` or `list year` respectively.
+```
 quantum list month
 quantum list year
 ```
 
 #### List by task or ref
-List tasks by task name or ref using `list task` and `list ref` followed by a space sepatated list of value to match against
+List tasks by task name or ref using `list task` and `list ref` followed by a space separated list of values to match against
 ```
 quantum list task "QUANTUM-001" "QUANTUM-002"
 quantum list ref "QUANTUM-001" "QUANTUM-002"

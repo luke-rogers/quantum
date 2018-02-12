@@ -62,15 +62,7 @@ func main() {
 					Category: "Data filtering",
 				},
 			},
-			Action: func(c *cli.Context) error {
-				searchDays, error := strconv.Atoi(c.Args().First())
-				if error != nil || searchDays == 0 {
-					searchDays = 7
-				}
-				return listAction(c, func(task Task) bool {
-					return task.Date.After(time.Now().AddDate(0, 0, -searchDays))
-				})
-			},
+			Action: listDaysAction,
 		},
 		{
 			Name:      "add",
@@ -98,6 +90,16 @@ func main() {
 	app.Run(os.Args)
 }
 
+func listDaysAction(c *cli.Context) error {
+	searchDays, error := strconv.Atoi(c.Args().First())
+	if error != nil || searchDays == 0 {
+		searchDays = 7
+	}
+	return listAction(c, func(task Task) bool {
+		return task.Date.After(time.Now().AddDate(0, 0, -searchDays))
+	})
+}
+
 func listMonthAction(c *cli.Context) error {
 	return listAction(c, func(task Task) bool {
 		return task.Date.After(time.Now().AddDate(0, -1, 0))
@@ -112,24 +114,23 @@ func listYearAction(c *cli.Context) error {
 
 func listTaskAction(c *cli.Context) error {
 	return listAction(c, func(task Task) bool {
-		for _, taskArg := range c.Args() {
-			if taskArg == task.Name {
-				return true
-			}
-		}
-		return false
+		return propertyMatches(c.Args(), task.Name)
 	})
 }
 
 func listRefAction(c *cli.Context) error {
 	return listAction(c, func(task Task) bool {
-		for _, refArg := range c.Args() {
-			if refArg == task.Ref {
-				return true
-			}
-		}
-		return false
+		return propertyMatches(c.Args(), task.Ref)
 	})
+}
+
+func propertyMatches(args []string, property string) bool {
+	for _, refArg := range args {
+		if refArg == property {
+			return true
+		}
+	}
+	return false
 }
 
 func listAction(c *cli.Context, filter listFilter) error {

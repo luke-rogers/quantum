@@ -15,6 +15,7 @@ quantum stop "FMO-123"
 
 #### List in-progress tasks
 To list in-progress tasks use `list inprogress`
+
 ```
 +--------+-----+---------------------+
 |  TASK  | REF |       STARTED       |
